@@ -1,0 +1,83 @@
+---
+title: "bayesAB exercise"
+author: "Mark Bounthavong"
+date: "8/21/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Bayesian analysis in R Exercise.
+
+This exercise will use the bayesAB package.
+
+The package can be downloaded using the following command: install.packages("bayesAB").    
+
+URL: https://www.r-bloggers.com/bayesian-ab-testing-made-easy/
+
+Exercise created by: BC Mullins.
+
+Date: 21 August 2017.                               
+
+```{r}
+library(bayesAB)
+set.seed(1)
+```
+
+## The setup
+Beta probability density function will have:       
+
+alpha = 10                                     
+
+beta  = 10                                    
+
+The control will have prior distribution of 50%     
+
+The treatment will have a prior distribution of 30%  
+
+Essentially, we are testing the hypothesis that the treatment group is has a lower probability of having an event occur compared to the control (30% versus 50%, respectively). Therefore, the control group can have a prior that follows a Bernoulli distribution.                                        
+
+## First collection -- Start with 20 observations each
+In the first collection, we assume that the control follows a prior Bernoulli distribution of 50%. Imagine that this is the probablity of having an event. Therefore, a 50% probability of having an event is like a coin flip. However, with treatment, the probability of having an event is lower, 30%. We start with a sample size of 20 for each group. 
+```{r}
+control_1 <- rbinom(20, 1, 0.5)
+treatment_1 <- rbinom(20, 1, 0.3)
+```
+
+## First Analysis
+In the first analysis, the distance and size of the treatment and control are slightly different. However, the probabilty that the treatment is better than control is 91.3%. 
+```{r}
+test1 <- bayesTest(treatment_1, control_1, distribution = "bernoulli", priors = c("alpha" = 10, "beta" = 10))
+print(test1)
+summary(test1)
+plot(test1)
+```
+
+
+## Second Collection -- Now, we add 20 more observations
+In the second collection, 20 additional observations are added to increase the sample size to 40. The expectation is that the more data that are available, the better the precision of the Bayesian posterior distribution. Again, maintaining that they control follows a prior Bernoulli distribution of 50% and the treatment follows a prior distribution of 30%, we obtain the following:
+```{r}
+control_2 <- rbind(control_1, rbinom(20, 1, 0.5))
+treatment_2 <- rbind(treatment_1, rbinom(20, 1, 0.3))
+```
+
+## Second Analysis
+In the second analysis, the distance and size between the two distrubitions have increased. You can now see that the probability that treatment is better than the control is 96.9%. 
+```{r}
+test2 <- bayesTest(treatment_2, control_2, distribution = "bernoulli", priors = c("alpha" = 10, "beta" = 10))
+print(test2)
+summary(test2)
+plot(test2)
+```
+
+## Conclusion
+As you increase the number of sample (trials), the better the Bayesian posterior probability becomes with each subsequent sample. This is akin to increasing the precision. But from a Bayesian perspective, this is simply updating the Bayesian prior each time the sample or trial increases. 
+
+Thus, with Bayesian analysis, we can do more than just determine that a treatment is better. We can also inform stakeholder how many times (or the probability) that the treatment will be better than the control. This is one reason why the FDA requires at least two randomized control trial in order to make sure that the second trial updates our Bayesian prior and generates a new posterior distribution. 
+
+## Credit
+BC Mullins created this exercise in R-Exercises which can be found here:
+http://www.r-exercises.com/2017/08/21/bayesian_ab_testing_made_easy/
+
